@@ -265,9 +265,9 @@ void loop() {
       digitalWrite (MQ135, LOW);
       delay (500);
       //int lectura = analogRead(A0);
-      //int humedad = (1024-lectura)*100/1024;
+       
       int humedad = random(0, 128);
-
+      humedad = (1024-lectura)*100/1024;
 //      int humedad =event.relative_humidity;
       Serial.print ("El porcentaje de humedad es: ");
       Serial.println (humedad);
