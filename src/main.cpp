@@ -201,9 +201,11 @@ void setup() {
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
-   
-  // Start up DS18b20 the library
-  //sensors.begin();
+  dht.begin();
+  sensor_t sensor;
+  dht.temperature().getSensor(&sensor);
+  dht.humidity().getSensor(&sensor);
+ 
 }
 
 
@@ -224,28 +226,39 @@ void loop() {
    if (1){
       // call sensors.requestTemperatures() to issue a global temperature 
       // request to all devices on the bus
-      Serial.print("Requesting temperatures...");
+      //Serial.print("Requesting temperatures...");
       //sensors.requestTemperatures(); // Send the command to get temperatures
-      Serial.println("DONE");
+      //Serial.println("DONE");
       // After we got the temperatures, we can print them here.
       // We use the function ByIndex, and as an example get the temperature from the first sensor only.
       //float tempC = sensors.getTempCByIndex(0);
       //-----------------------
-
+      sensors_event_t event;
+      int tempC=0;
+      dht.temperature().getEvent(&event);
+      if (isnan(event.temperature)) {
+        Serial.println(F("Error reading temperature!"));
+      }
+      else {
+        Serial.print(F("Temperature: "));
+        tempC = event.temperature;
+        Serial.print(tempC);
+        Serial.println(F("°C"));
+      } 
   
  
 //----------------------------------------------
      //----11-08-24-------------------------------------
-      int tempC = random(0, 100);
+      //int tempC = random(0, 100);
       
      //      int TEMP = analogRead(A0);
       //int tempC = ((TEMP * 5000.0) / 1023) / 10;
-      Serial.println(tempC);
+      //Serial.println(tempC);
       // Check if reading was successful
       if(tempC != DEVICE_DISCONNECTED_C) 
         {
-        Serial.print("Temperature for the device 1 (index 0) is: ");
-        Serial.println(tempC);
+       // Serial.print("Temperature for the device 1 (index 0) is: ");
+       // Serial.println(tempC);
         //snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
         //snprintf (msg, MSG_BUFFER_SIZE, "%ld", (char)tempC);
         mensaje =  String(tempC);
@@ -266,11 +279,27 @@ void loop() {
       delay (500);
       //int lectura = analogRead(A0);
        
-      int humedad = random(0, 128);
+      //---------------------------------------------
+      // Get humidity event and print its value.
+      dht.humidity().getEvent(&event);
+      int humedad;
+      if (isnan(event.relative_humidity)) {
+        Serial.println(F("Error reading humidity!"));
+      }
+      else {
+        Serial.print(F("Humidity: "));
+        humedad =event.relative_humidity;
+        Serial.print(humedad);
+        Serial.println(F("%"));
+      }
+
+       //---------------------------------------------
+
+      //int humedad = random(0, 128);
       //humedad = (1024-lectura)*100/1024;
 //      int humedad =event.relative_humidity;
-      Serial.print ("El porcentaje de humedad es: ");
-      Serial.println (humedad);
+     // Serial.print ("El porcentaje de humedad es: ");
+      //Serial.println (humedad);
       mensaje =  String(humedad);
       mensaje.toCharArray(msg, MSG_BUFFER_SIZE);      
       Serial.print("Publish message: ");
